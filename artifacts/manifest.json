@@ -1,0 +1,56 @@
+{
+  "config_chunking": {
+    "chunk_size": 500,
+    "overlap": 100,
+    "tokenizador": "gpt-3.5-turbo",
+    "versao_limpeza": "5"
+  },
+  "config_embeddings": {
+    "dimensao": 3072,
+    "dtype": "float32",
+    "formato_documento": "title: none | text: {content}",
+    "formato_query": "task: search result | query: {content}",
+    "modelo": "gemini-embedding-2",
+    "normalizacao": "L2"
+  },
+  "documentos": {
+    "ISLP-5.pdf": {
+      "chunks": {
+        "path": "artifacts/documentos/ISLP-5/chunks.jsonl",
+        "sha256": "485adcc8b360fa667b0c231582dc23bb8fd2ae397954a2e2316772a5584e7e3e"
+      },
+      "embeddings": {
+        "path": "artifacts/embeddings/c34883a4e6f7e519eee9/ISLP-5.npz",
+        "sha256": "d161be0cd8182065381f406a1fad73db15e7de987e987e7f4a163ac91f743b41"
+      },
+      "pdf_sha256": "3d6b4b6fcacf2bc317a75680ae7e35efc39c94751295fad9796a03e2d5437fee",
+      "quantidade_chunks": 36
+    },
+    "ISLP-7.pdf": {
+      "chunks": {
+        "path": "artifacts/documentos/ISLP-7/chunks.jsonl",
+        "sha256": "e78117ab24e4076c375f1d44d9a8fb43184d98208038a0e9e1933de8cdf5671f"
+      },
+      "embeddings": {
+        "path": "artifacts/embeddings/c34883a4e6f7e519eee9/ISLP-7.npz",
+        "sha256": "14d951f94781544959b7f12cbbbf67f610cfbda3782ceacf1099b1ab375657b2"
+      },
+      "pdf_sha256": "1d996e3fe9f452175608ccab300cf670273d6925eddab8db74ed09f140505c65",
+      "quantidade_chunks": 63
+    },
+    "ISLP-8.pdf": {
+      "chunks": {
+        "path": "artifacts/documentos/ISLP-8/chunks.jsonl",
+        "sha256": "16999ade9cc7fd83bf8e92f777ab1c1efb6fe2f5d13de50c962a95578ce42523"
+      },
+      "embeddings": {
+        "path": "artifacts/embeddings/c34883a4e6f7e519eee9/ISLP-8.npz",
+        "sha256": "76b99657c1653a0f0b6e57ae20f1f105e203d7bce5790016e1323d431222223d"
+      },
+      "pdf_sha256": "6637a3fcebb23e180a41e117dcb10e7a8e5eacf2c559e40c714e18f7c24d7d06",
+      "quantidade_chunks": 50
+    }
+  },
+  "quantidade_chunks": 149,
+  "versao_arquivo": 1
+}

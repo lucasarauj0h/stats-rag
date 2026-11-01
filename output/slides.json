@@ -1,0 +1,34 @@
+{
+  "titulo": "O Trade-off Viés-Variância na Validação Cruzada k-Fold",
+  "slides": [
+    {
+      "template_id": "pixel_abertura",
+      "campos": {
+        "titulo": "Escolha de k e o Trade-off Viés-Variância",
+        "apresentacao": "Além de questões computacionais, a escolha do número de folds k no k-fold cross-validation envolve um trade-off direto entre viés e variância ao estimar o erro de teste, especialmente em comparação com o LOOCV (k = n) [E1, E3].",
+        "fontes": "ISLP-5.pdf. E1: p. 8, 9; E3: p. 6, 7",
+        "autor": "Lucas Souza"
+      }
+    },
+    {
+      "template_id": "pixel_comparacao",
+      "campos": {
+        "titulo": "Comparação: LOOCV versus k-Fold (k < n)",
+        "cabecalho_esquerdo": "LOOCV (k = n)",
+        "coluna_esquerda": "Viés menor: treina em n - 1 observações, gerando estimativas quase não tendenciosas do erro de teste [E1]. Variância maior: calcula a média de saídas de n modelos altamente correlacionados entre si, pois seus conjuntos de treino são quase idênticos [E1].",
+        "cabecalho_direito": "k-Fold com k < n (ex.: k = 5 ou 10)",
+        "coluna_direita": "Viés intermediário: cada conjunto de treino possui cerca de (k - 1)n/k observações, tendo mais viés que o LOOCV, mas bem menos que a abordagem de validação simples [E1]. Variância menor: calcula a média de modelos com menor sobreposição de treino e menor correlação entre si [E1, E2].",
+        "fontes": "ISLP-5.pdf. E1: p. 8, 9; E2: p. 9, 10"
+      }
+    },
+    {
+      "template_id": "pixel_conceito",
+      "campos": {
+        "titulo": "Por que k = 5 ou k = 10 é Frequentemente Escolhido?",
+        "conteudo": "A média de quantidades altamente correlacionadas tem maior variância do que a de grandezas menos correlacionadas, tornando a estimativa do LOOCV mais sujeita a alta variância [E1, E2]. Como resultado do balanço entre viés e variância, utilizar empiricamente k = 5 ou k = 10 alcança estimativas de erro que não sofrem nem de viés excessivamente alto nem de variância muito alta, além da clara vantagem computacional sobre o LOOCV [E1, E2, E3].",
+        "fontes": "ISLP-5.pdf. E1: p. 8, 9; E2: p. 9, 10; E3: p. 6, 7"
+      }
+    }
+  ],
+  "autor": "Lucas Souza"
+}

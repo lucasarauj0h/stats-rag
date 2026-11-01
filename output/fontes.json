@@ -1,0 +1,26 @@
+{
+  "query": "What is the bias–variance trade-off when choosing the number of folds in k-fold cross-validation, particularly compared with LOOCV?",
+  "fontes": [
+    {
+      "referencia": "E1",
+      "chunk_id": "508106d6-590e-50c8-95a5-1698c077efcb_11",
+      "documento": "ISLP-5.pdf",
+      "paginas_pdf": "8, 9",
+      "secao": "Bias-Variance Trade-Off for k-Fold Cross-Validation"
+    },
+    {
+      "referencia": "E2",
+      "chunk_id": "508106d6-590e-50c8-95a5-1698c077efcb_12",
+      "documento": "ISLP-5.pdf",
+      "paginas_pdf": "9, 10",
+      "secao": "Cross-Validation on Classification Problems"
+    },
+    {
+      "referencia": "E3",
+      "chunk_id": "508106d6-590e-50c8-95a5-1698c077efcb_8",
+      "documento": "ISLP-5.pdf",
+      "paginas_pdf": "6, 7",
+      "secao": "k-Fold Cross-Validation"
+    }
+  ]
+}
