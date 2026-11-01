@@ -1,0 +1,82 @@
+{
+  "titulo": "Templates revisados: Pixel e UFABC",
+  "autor": "Lucas Souza",
+  "slides": [
+    {
+      "template_id": "pixel_abertura",
+      "campos": {
+        "titulo": "Viés e variância na validação cruzada",
+        "apresentacao": "A escolha do número de dobras, k, envolve um compromisso entre o tamanho dos conjuntos de treino e a correlação entre os resultados das rodadas. Esses fatores ajudam a explicar o viés e a variância da estimativa do erro de teste. [E1]\n\nO LOOCV usa quase todos os dados em cada ajuste. O k-fold com menos dobras utiliza conjuntos menores, mas também reduz a sobreposição entre eles. O ISLP discute por que valores como k = 5 ou k = 10 podem oferecer um equilíbrio útil entre esses efeitos. [E1, E2]\n\nTambém há uma diferença computacional: o LOOCV exige n ajustes, enquanto o k-fold exige k. [E3]",
+        "autor": "Lucas Souza",
+        "fontes": "ISLP-5.pdf. E1: p. 8-9. E2: p. 9-10. E3: p. 6-7."
+      }
+    },
+    {
+      "template_id": "pixel_conceito",
+      "campos": {
+        "titulo": "Viés na validação cruzada",
+        "conteudo": "O LOOCV corresponde ao caso em que k = n. Cada modelo utiliza n - 1 observações para treino, uma quantidade próxima do conjunto completo. Por isso, na discussão apresentada pelo ISLP, a estimativa do erro de teste é aproximadamente não viesada. [E1, E3]\n\nNo k-fold com k < n, cada conjunto de treino contém aproximadamente (k - 1)n/k observações. Como o treinamento utiliza menos dados, a estimativa tende a apresentar maior viés em relação ao LOOCV. Aumentar k aproxima o tamanho desses conjuntos daquele utilizado no LOOCV. [E1]\n\nEssa é uma comparação do viés da estimativa do erro de teste. A escolha de k também precisa considerar sua variância e o custo computacional do procedimento. [E1, E3]",
+        "fontes": "ISLP-5.pdf. E1: p. 8-9. E3: p. 6-7."
+      }
+    },
+    {
+      "template_id": "pixel_comparacao",
+      "campos": {
+        "titulo": "LOOCV e k-fold: o compromisso",
+        "cabecalho_esquerdo": "LOOCV (k = n)",
+        "coluna_esquerda": "Cada rodada utiliza n - 1 observações para treino. Por trabalhar com quase todos os dados, o procedimento produz uma estimativa do erro de teste aproximadamente não viesada na discussão do livro. [E1, E3]\n\nOs conjuntos de treino são quase idênticos. A forte correlação entre os resultados das rodadas pode elevar a variância da média usada para estimar o erro de teste. O procedimento exige n ajustes. [E1, E2, E3]",
+        "cabecalho_direito": "k-fold (k < n)",
+        "coluna_direita": "Os conjuntos de treino são menores, o que pode aumentar o viés em relação ao LOOCV. Em contrapartida, há menor sobreposição entre os conjuntos usados nas rodadas e menor correlação entre seus resultados. [E1]\n\nEsse equilíbrio ajuda a explicar o uso de k = 5 ou k = 10. O procedimento requer k ajustes, reduzindo o número de treinamentos quando k < n. [E1, E2, E3]",
+        "fontes": "ISLP-5.pdf. E1: p. 8-9. E2: p. 9-10. E3: p. 6-7."
+      }
+    },
+    {
+      "template_id": "pixel_formula",
+      "campos": {
+        "titulo": "Cálculo e custo do k-fold",
+        "conteudo": "As observações são divididas em k grupos. Cada grupo participa uma vez da validação, enquanto os demais formam o conjunto de treino. Em regressão, podemos combinar os erros quadráticos médios das rodadas para obter uma estimativa do erro de teste. [E3]",
+        "formula": "\"CV\"_(k) = frac(1, k) sum_(i=1)^k \"MSE\"_i",
+        "legenda": "Cada MSE_i representa o erro medido na dobra de validação i. A expressão calcula a média dos k erros. O k-fold exige k ajustes do modelo, enquanto o LOOCV exige n. Quando k < n, há menos ajustes a realizar. [E3]",
+        "fontes": "ISLP-5.pdf. E3: p. 6-7."
+      }
+    },
+    {
+      "template_id": "ufabc_abertura",
+      "campos": {
+        "titulo": "Viés e variância na validação cruzada",
+        "apresentacao": "A escolha do número de dobras, k, envolve um compromisso entre o tamanho dos conjuntos de treino e a correlação entre os resultados das rodadas. Esses fatores ajudam a explicar o viés e a variância da estimativa do erro de teste. [E1]\n\nO LOOCV usa quase todos os dados em cada ajuste. O k-fold com menos dobras utiliza conjuntos menores, mas também reduz a sobreposição entre eles. O ISLP discute por que valores como k = 5 ou k = 10 podem oferecer um equilíbrio útil entre esses efeitos. [E1, E2]\n\nTambém há uma diferença computacional: o LOOCV exige n ajustes, enquanto o k-fold exige k. [E3]",
+        "autor": "Lucas Souza",
+        "fontes": "ISLP-5.pdf. E1: p. 8-9. E2: p. 9-10. E3: p. 6-7."
+      }
+    },
+    {
+      "template_id": "ufabc_conceito",
+      "campos": {
+        "titulo": "Viés na validação cruzada",
+        "conteudo": "O LOOCV corresponde ao caso em que k = n. Cada modelo utiliza n - 1 observações para treino, uma quantidade próxima do conjunto completo. Por isso, na discussão apresentada pelo ISLP, a estimativa do erro de teste é aproximadamente não viesada. [E1, E3]\n\nNo k-fold com k < n, cada conjunto de treino contém aproximadamente (k - 1)n/k observações. Como o treinamento utiliza menos dados, a estimativa tende a apresentar maior viés em relação ao LOOCV. Aumentar k aproxima o tamanho desses conjuntos daquele utilizado no LOOCV. [E1]\n\nEssa é uma comparação do viés da estimativa do erro de teste. A escolha de k também precisa considerar sua variância e o custo computacional do procedimento. [E1, E3]",
+        "fontes": "ISLP-5.pdf. E1: p. 8-9. E3: p. 6-7."
+      }
+    },
+    {
+      "template_id": "ufabc_comparacao",
+      "campos": {
+        "titulo": "LOOCV e k-fold: o compromisso",
+        "cabecalho_esquerdo": "LOOCV (k = n)",
+        "coluna_esquerda": "Cada rodada utiliza n - 1 observações para treino. Por trabalhar com quase todos os dados, o procedimento produz uma estimativa do erro de teste aproximadamente não viesada na discussão do livro. [E1, E3]\n\nOs conjuntos de treino são quase idênticos. A forte correlação entre os resultados das rodadas pode elevar a variância da média usada para estimar o erro de teste. O procedimento exige n ajustes. [E1, E2, E3]",
+        "cabecalho_direito": "k-fold (k < n)",
+        "coluna_direita": "Os conjuntos de treino são menores, o que pode aumentar o viés em relação ao LOOCV. Em contrapartida, há menor sobreposição entre os conjuntos usados nas rodadas e menor correlação entre seus resultados. [E1]\n\nEsse equilíbrio ajuda a explicar o uso de k = 5 ou k = 10. O procedimento requer k ajustes, reduzindo o número de treinamentos quando k < n. [E1, E2, E3]",
+        "fontes": "ISLP-5.pdf. E1: p. 8-9. E2: p. 9-10. E3: p. 6-7."
+      }
+    },
+    {
+      "template_id": "ufabc_formula",
+      "campos": {
+        "titulo": "Cálculo e custo do k-fold",
+        "conteudo": "As observações são divididas em k grupos. Cada grupo participa uma vez da validação, enquanto os demais formam o conjunto de treino. Em regressão, podemos combinar os erros quadráticos médios das rodadas para obter uma estimativa do erro de teste. [E3]",
+        "formula": "\"CV\"_(k) = frac(1, k) sum_(i=1)^k \"MSE\"_i",
+        "legenda": "Cada MSE_i representa o erro medido na dobra de validação i. A expressão calcula a média dos k erros. O k-fold exige k ajustes do modelo, enquanto o LOOCV exige n. Quando k < n, há menos ajustes a realizar. [E3]",
+        "fontes": "ISLP-5.pdf. E3: p. 6-7."
+      }
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "campus_sa.jpg": {
+    "origem": "https://www.ufabc.edu.br/images/imagens_a_ufabc/campus-sa.jpg",
+    "pagina": "https://www.ufabc.edu.br/a-ufabc/campi",
+    "credito": "Portal institucional da UFABC. Fotógrafo não identificado na página consultada."
+  },
+  "campus_sbc.jpg": {
+    "origem": "https://www.ufabc.edu.br/images/imagens_a_ufabc/campus-sbc.jpg",
+    "pagina": "https://www.ufabc.edu.br/a-ufabc/campi",
+    "credito": "Portal institucional da UFABC. Fotógrafo não identificado na página consultada."
+  },
+  "logotipos": {
+    "origem": "https://www.ufabc.edu.br/administracao/sucom/programacao-visual/manual-de-identidade-visual-da-ufabc",
+    "arquivos": [
+      "https://www.ufabc.edu.br/images/aci/logotipo/principal-png.zip",
+      "https://www.ufabc.edu.br/images/aci/logotipo/negativo-png.zip"
+    ],
+    "observacao": "Arquivos oficiais preservados. As margens transparentes foram recortadas no enquadramento da imagem no slide, mantendo a proporção do logotipo. Proposta de estudo independente, sem indicação de aprovação institucional."
+  },
+  "fundos_pixel": {
+    "tipo": "Ilustrações decorativas geradas por IA",
+    "ferramenta": "image_gen integrado",
+    "prompts": "prompts_pixel_v2.json",
+    "arquivos": [
+      "pixel_abertura.png",
+      "pixel_conceito.png",
+      "pixel_comparacao.png",
+      "pixel_formula.png"
+    ]
+  },
+  "Pixelify Sans": {
+    "origem": "https://github.com/google/fonts/tree/main/ofl/pixelifysans",
+    "licenca": "fonts/LICENSE-pixelify.txt",
+    "arquivo": "fonts/PixelifySans-Variable.ttf"
+  },
+  "Fira Sans e Fira Mono": {
+    "origem": "https://github.com/mozilla/Fira",
+    "licencas": [
+      "fonts/LICENSE-firasans.txt",
+      "fonts/LICENSE-firamono.txt"
+    ]
+  }
+}

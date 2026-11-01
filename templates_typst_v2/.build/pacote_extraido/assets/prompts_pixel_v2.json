@@ -1,0 +1,25 @@
+{
+  "ferramenta": "image_gen integrado",
+  "prompts": [
+    {
+      "key": "pixel_abertura",
+      "name": "Cubo de dados à direita",
+      "prompt": "Use case: stylized-concept. Asset type: 16:9 landscape background for academic slides with editable text added later. Restrained crisp 8-bit pixel art, sharp square pixels, deep flat midnight navy #09121F background, cyan/mint #86F6CD with subtle violet accents. No words, letters, numbers, equations, axes labels, logos, panels, borders or watermark. Decoration is abstract and not scientific evidence. Leave the top 90 pixels and bottom 65 pixels empty. The large text area must be a completely clean almost solid dark background with no bright shapes or fine textures. Place one compact elegant isometric pixel DATA CUBE, made of sparse separated glowing voxel data points and a few short connecting trails, entirely within the far RIGHT 22 percent of the canvas. Keep the LEFT 76 percent empty dark space for text. The cube should be a small vertical visual accent, not a large centerpiece. Sophisticated retro-computing mood, no robot, no room."
+    },
+    {
+      "key": "pixel_conceito",
+      "name": "Árvore pixelada à esquerda",
+      "prompt": "Use case: stylized-concept. Asset type: 16:9 landscape background for academic slides with editable text added later. Restrained crisp 8-bit pixel art, sharp square pixels, deep flat midnight navy #09121F background, cyan/mint #86F6CD with subtle violet accents. No words, letters, numbers, equations, axes labels, logos, panels, borders or watermark. Decoration is abstract and not scientific evidence. Leave the top 90 pixels and bottom 65 pixels empty. The large text area must be a completely clean almost solid dark background with no bright shapes or fine textures. Place a narrow sparse branching pixel TREE / computational decision structure entirely along the far LEFT 17 percent of the canvas, between 25 and 85 percent height. Tiny squares linked by stepped paths, emerald and cyan accents, low luminance. Keep the RIGHT 80 percent empty dark space for long paragraphs. Do not draw any root labels, text, charts or large centerpiece."
+    },
+    {
+      "key": "pixel_comparacao",
+      "name": "Nuvens de dados à direita",
+      "prompt": "Use case: stylized-concept. Asset type: 16:9 landscape background for academic slides with editable text added later. Restrained crisp 8-bit pixel art, sharp square pixels, deep flat midnight navy #09121F background, cyan/mint #86F6CD with subtle violet accents. No words, letters, numbers, equations, axes labels, logos, panels, borders or watermark. Decoration is abstract and not scientific evidence. Leave the top 90 pixels and bottom 65 pixels empty. The large text area must be a completely clean almost solid dark background with no bright shapes or fine textures. Place a slim vertical decorative composition of THREE SMALL abstract pixel DATA CLUSTERS with a few stepped pixel connections, entirely within the far RIGHT 14 percent of the canvas. Scatter-cloud motif using tiny mint and violet squares. Keep the LEFT 83 percent empty dark space for a two-column textual comparison. No plot axes or scientific chart, no labels. Low luminance near the inner edge."
+    },
+    {
+      "key": "pixel_formula",
+      "name": "Matriz pixelada à esquerda",
+      "prompt": "Use case: stylized-concept. Asset type: 16:9 landscape background for academic slides with editable text added later. Restrained crisp 8-bit pixel art, sharp square pixels, deep flat midnight navy #09121F background, cyan/mint #86F6CD with subtle violet accents. No words, letters, numbers, equations, axes labels, logos, panels, borders or watermark. Decoration is abstract and not scientific evidence. Leave the top 90 pixels and bottom 65 pixels empty. The large text area must be a completely clean almost solid dark background with no bright shapes or fine textures. Place one narrow vertical abstract pixel MATRIX / sparse heatmap strip along the far LEFT 16 percent of the canvas, made of small discrete square clusters and very short stepped traces, asymmetric elegant pattern, mint-cyan-violet accents. Keep the RIGHT 81 percent empty dark space for equations and long explanatory text. This is a subtle decorative vertical accent, not a labeled heatmap and not a data chart."
+    }
+  ]
+}

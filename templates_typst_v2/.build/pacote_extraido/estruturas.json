@@ -1,0 +1,606 @@
+{
+  "versao": 2,
+  "canvas_px": {
+    "largura": 1280,
+    "altura": 720
+  },
+  "unidade_tamanho_fonte": "pt",
+  "layouts": [
+    {
+      "tema": "pixel",
+      "template_id": "pixel_abertura",
+      "nome": "Abertura compacta",
+      "campos": [
+        {
+          "nome": "titulo",
+          "papel": "titulo",
+          "caixa_px": {
+            "x": 64,
+            "y": 52,
+            "largura": 980,
+            "altura": 50
+          },
+          "tamanho_pt": 26,
+          "minimo_pt": 24,
+          "fonte": "Pixelify Sans",
+          "cor": "86F6CD",
+          "negrito": true
+        },
+        {
+          "nome": "apresentacao",
+          "papel": "texto",
+          "caixa_px": {
+            "x": 64,
+            "y": 160,
+            "largura": 850,
+            "altura": 380
+          },
+          "tamanho_pt": 18,
+          "minimo_pt": 16,
+          "fonte": "Pixelify Sans",
+          "cor": "F3F8FA",
+          "negrito": false
+        },
+        {
+          "nome": "autor",
+          "papel": "texto",
+          "caixa_px": {
+            "x": 64,
+            "y": 592,
+            "largura": 820,
+            "altura": 35
+          },
+          "tamanho_pt": 14,
+          "minimo_pt": 14,
+          "fonte": "Pixelify Sans",
+          "cor": "86F6CD",
+          "negrito": false
+        },
+        {
+          "nome": "fontes",
+          "papel": "fonte",
+          "caixa_px": {
+            "x": 64,
+            "y": 670,
+            "largura": 980,
+            "altura": 23
+          },
+          "tamanho_pt": 10.5,
+          "minimo_pt": 10.5,
+          "fonte": "Pixelify Sans",
+          "cor": "B5C5D3",
+          "negrito": false
+        }
+      ]
+    },
+    {
+      "tema": "pixel",
+      "template_id": "pixel_conceito",
+      "nome": "Explicação em texto livre",
+      "campos": [
+        {
+          "nome": "titulo",
+          "papel": "titulo",
+          "caixa_px": {
+            "x": 270,
+            "y": 52,
+            "largura": 946,
+            "altura": 50
+          },
+          "tamanho_pt": 26,
+          "minimo_pt": 24,
+          "fonte": "Pixelify Sans",
+          "cor": "86F6CD",
+          "negrito": true
+        },
+        {
+          "nome": "conteudo",
+          "papel": "texto",
+          "caixa_px": {
+            "x": 270,
+            "y": 144,
+            "largura": 946,
+            "altura": 484
+          },
+          "tamanho_pt": 18,
+          "minimo_pt": 16,
+          "fonte": "Pixelify Sans",
+          "cor": "F3F8FA",
+          "negrito": false
+        },
+        {
+          "nome": "fontes",
+          "papel": "fonte",
+          "caixa_px": {
+            "x": 270,
+            "y": 670,
+            "largura": 840,
+            "altura": 23
+          },
+          "tamanho_pt": 10.5,
+          "minimo_pt": 10.5,
+          "fonte": "Pixelify Sans",
+          "cor": "B5C5D3",
+          "negrito": false
+        }
+      ]
+    },
+    {
+      "tema": "pixel",
+      "template_id": "pixel_comparacao",
+      "nome": "Comparação em duas colunas",
+      "campos": [
+        {
+          "nome": "titulo",
+          "papel": "titulo",
+          "caixa_px": {
+            "x": 64,
+            "y": 52,
+            "largura": 980,
+            "altura": 50
+          },
+          "tamanho_pt": 26,
+          "minimo_pt": 24,
+          "fonte": "Pixelify Sans",
+          "cor": "86F6CD",
+          "negrito": true
+        },
+        {
+          "nome": "cabecalho_esquerdo",
+          "papel": "subtitulo",
+          "caixa_px": {
+            "x": 64,
+            "y": 166,
+            "largura": 460,
+            "altura": 40
+          },
+          "tamanho_pt": 20,
+          "minimo_pt": 19,
+          "fonte": "Pixelify Sans",
+          "cor": "86F6CD",
+          "negrito": true
+        },
+        {
+          "nome": "coluna_esquerda",
+          "papel": "texto",
+          "caixa_px": {
+            "x": 64,
+            "y": 232,
+            "largura": 460,
+            "altura": 392
+          },
+          "tamanho_pt": 18,
+          "minimo_pt": 16,
+          "fonte": "Pixelify Sans",
+          "cor": "F3F8FA",
+          "negrito": false
+        },
+        {
+          "nome": "cabecalho_direito",
+          "papel": "subtitulo",
+          "caixa_px": {
+            "x": 580,
+            "y": 166,
+            "largura": 460,
+            "altura": 40
+          },
+          "tamanho_pt": 20,
+          "minimo_pt": 19,
+          "fonte": "Pixelify Sans",
+          "cor": "B4AAF6",
+          "negrito": true
+        },
+        {
+          "nome": "coluna_direita",
+          "papel": "texto",
+          "caixa_px": {
+            "x": 580,
+            "y": 232,
+            "largura": 460,
+            "altura": 392
+          },
+          "tamanho_pt": 18,
+          "minimo_pt": 16,
+          "fonte": "Pixelify Sans",
+          "cor": "F3F8FA",
+          "negrito": false
+        },
+        {
+          "nome": "fontes",
+          "papel": "fonte",
+          "caixa_px": {
+            "x": 64,
+            "y": 670,
+            "largura": 980,
+            "altura": 23
+          },
+          "tamanho_pt": 10.5,
+          "minimo_pt": 10.5,
+          "fonte": "Pixelify Sans",
+          "cor": "B5C5D3",
+          "negrito": false
+        }
+      ]
+    },
+    {
+      "tema": "pixel",
+      "template_id": "pixel_formula",
+      "nome": "Explicação com fórmula",
+      "campos": [
+        {
+          "nome": "titulo",
+          "papel": "titulo",
+          "caixa_px": {
+            "x": 270,
+            "y": 52,
+            "largura": 946,
+            "altura": 50
+          },
+          "tamanho_pt": 26,
+          "minimo_pt": 24,
+          "fonte": "Pixelify Sans",
+          "cor": "86F6CD",
+          "negrito": true
+        },
+        {
+          "nome": "conteudo",
+          "papel": "texto",
+          "caixa_px": {
+            "x": 270,
+            "y": 144,
+            "largura": 946,
+            "altura": 164
+          },
+          "tamanho_pt": 18,
+          "minimo_pt": 16,
+          "fonte": "Pixelify Sans",
+          "cor": "F3F8FA",
+          "negrito": false
+        },
+        {
+          "nome": "formula",
+          "papel": "formula",
+          "caixa_px": {
+            "x": 270,
+            "y": 340,
+            "largura": 946,
+            "altura": 125
+          },
+          "tamanho_pt": 28,
+          "minimo_pt": 26,
+          "fonte": "New Computer Modern Math",
+          "cor": "86F6CD",
+          "negrito": false
+        },
+        {
+          "nome": "legenda",
+          "papel": "texto",
+          "caixa_px": {
+            "x": 270,
+            "y": 506,
+            "largura": 946,
+            "altura": 128
+          },
+          "tamanho_pt": 18,
+          "minimo_pt": 16,
+          "fonte": "Pixelify Sans",
+          "cor": "F3F8FA",
+          "negrito": false
+        },
+        {
+          "nome": "fontes",
+          "papel": "fonte",
+          "caixa_px": {
+            "x": 270,
+            "y": 670,
+            "largura": 840,
+            "altura": 23
+          },
+          "tamanho_pt": 10.5,
+          "minimo_pt": 10.5,
+          "fonte": "Pixelify Sans",
+          "cor": "B5C5D3",
+          "negrito": false
+        }
+      ]
+    },
+    {
+      "tema": "ufabc",
+      "template_id": "ufabc_abertura",
+      "nome": "Abertura compacta",
+      "campos": [
+        {
+          "nome": "titulo",
+          "papel": "titulo",
+          "caixa_px": {
+            "x": 64,
+            "y": 52,
+            "largura": 970,
+            "altura": 50
+          },
+          "tamanho_pt": 26,
+          "minimo_pt": 24,
+          "fonte": "Fira Sans",
+          "cor": "FFFFFF",
+          "negrito": true
+        },
+        {
+          "nome": "apresentacao",
+          "papel": "texto",
+          "caixa_px": {
+            "x": 64,
+            "y": 160,
+            "largura": 1110,
+            "altura": 380
+          },
+          "tamanho_pt": 18,
+          "minimo_pt": 16,
+          "fonte": "Fira Sans",
+          "cor": "F3F8FA",
+          "negrito": false
+        },
+        {
+          "nome": "autor",
+          "papel": "texto",
+          "caixa_px": {
+            "x": 64,
+            "y": 592,
+            "largura": 820,
+            "altura": 35
+          },
+          "tamanho_pt": 14,
+          "minimo_pt": 14,
+          "fonte": "Fira Sans",
+          "cor": "FFFFFF",
+          "negrito": false
+        },
+        {
+          "nome": "fontes",
+          "papel": "fonte",
+          "caixa_px": {
+            "x": 64,
+            "y": 670,
+            "largura": 1050,
+            "altura": 23
+          },
+          "tamanho_pt": 10.5,
+          "minimo_pt": 10.5,
+          "fonte": "Fira Sans",
+          "cor": "B5C5D3",
+          "negrito": false
+        }
+      ]
+    },
+    {
+      "tema": "ufabc",
+      "template_id": "ufabc_conceito",
+      "nome": "Explicação em texto livre",
+      "campos": [
+        {
+          "nome": "titulo",
+          "papel": "titulo",
+          "caixa_px": {
+            "x": 64,
+            "y": 52,
+            "largura": 970,
+            "altura": 50
+          },
+          "tamanho_pt": 26,
+          "minimo_pt": 24,
+          "fonte": "Fira Sans",
+          "cor": "005C3C",
+          "negrito": true
+        },
+        {
+          "nome": "conteudo",
+          "papel": "texto",
+          "caixa_px": {
+            "x": 64,
+            "y": 144,
+            "largura": 1152,
+            "altura": 484
+          },
+          "tamanho_pt": 18,
+          "minimo_pt": 16,
+          "fonte": "Fira Sans",
+          "cor": "18362E",
+          "negrito": false
+        },
+        {
+          "nome": "fontes",
+          "papel": "fonte",
+          "caixa_px": {
+            "x": 64,
+            "y": 670,
+            "largura": 1050,
+            "altura": 23
+          },
+          "tamanho_pt": 10.5,
+          "minimo_pt": 10.5,
+          "fonte": "Fira Sans",
+          "cor": "5B6965",
+          "negrito": false
+        }
+      ]
+    },
+    {
+      "tema": "ufabc",
+      "template_id": "ufabc_comparacao",
+      "nome": "Comparação em duas colunas",
+      "campos": [
+        {
+          "nome": "titulo",
+          "papel": "titulo",
+          "caixa_px": {
+            "x": 64,
+            "y": 52,
+            "largura": 970,
+            "altura": 50
+          },
+          "tamanho_pt": 26,
+          "minimo_pt": 24,
+          "fonte": "Fira Sans",
+          "cor": "FFFFFF",
+          "negrito": true
+        },
+        {
+          "nome": "cabecalho_esquerdo",
+          "papel": "subtitulo",
+          "caixa_px": {
+            "x": 64,
+            "y": 166,
+            "largura": 552,
+            "altura": 40
+          },
+          "tamanho_pt": 20,
+          "minimo_pt": 19,
+          "fonte": "Fira Sans",
+          "cor": "005C3C",
+          "negrito": true
+        },
+        {
+          "nome": "coluna_esquerda",
+          "papel": "texto",
+          "caixa_px": {
+            "x": 64,
+            "y": 232,
+            "largura": 552,
+            "altura": 392
+          },
+          "tamanho_pt": 18,
+          "minimo_pt": 16,
+          "fonte": "Fira Sans",
+          "cor": "18362E",
+          "negrito": false
+        },
+        {
+          "nome": "cabecalho_direito",
+          "papel": "subtitulo",
+          "caixa_px": {
+            "x": 664,
+            "y": 166,
+            "largura": 552,
+            "altura": 40
+          },
+          "tamanho_pt": 20,
+          "minimo_pt": 19,
+          "fonte": "Fira Sans",
+          "cor": "005C3C",
+          "negrito": true
+        },
+        {
+          "nome": "coluna_direita",
+          "papel": "texto",
+          "caixa_px": {
+            "x": 664,
+            "y": 232,
+            "largura": 552,
+            "altura": 392
+          },
+          "tamanho_pt": 18,
+          "minimo_pt": 16,
+          "fonte": "Fira Sans",
+          "cor": "18362E",
+          "negrito": false
+        },
+        {
+          "nome": "fontes",
+          "papel": "fonte",
+          "caixa_px": {
+            "x": 64,
+            "y": 670,
+            "largura": 1050,
+            "altura": 23
+          },
+          "tamanho_pt": 10.5,
+          "minimo_pt": 10.5,
+          "fonte": "Fira Sans",
+          "cor": "5B6965",
+          "negrito": false
+        }
+      ]
+    },
+    {
+      "tema": "ufabc",
+      "template_id": "ufabc_formula",
+      "nome": "Explicação com fórmula",
+      "campos": [
+        {
+          "nome": "titulo",
+          "papel": "titulo",
+          "caixa_px": {
+            "x": 64,
+            "y": 52,
+            "largura": 970,
+            "altura": 50
+          },
+          "tamanho_pt": 26,
+          "minimo_pt": 24,
+          "fonte": "Fira Sans",
+          "cor": "005C3C",
+          "negrito": true
+        },
+        {
+          "nome": "conteudo",
+          "papel": "texto",
+          "caixa_px": {
+            "x": 64,
+            "y": 144,
+            "largura": 1152,
+            "altura": 164
+          },
+          "tamanho_pt": 18,
+          "minimo_pt": 16,
+          "fonte": "Fira Sans",
+          "cor": "18362E",
+          "negrito": false
+        },
+        {
+          "nome": "formula",
+          "papel": "formula",
+          "caixa_px": {
+            "x": 64,
+            "y": 340,
+            "largura": 1152,
+            "altura": 125
+          },
+          "tamanho_pt": 28,
+          "minimo_pt": 26,
+          "fonte": "New Computer Modern Math",
+          "cor": "18362E",
+          "negrito": false
+        },
+        {
+          "nome": "legenda",
+          "papel": "texto",
+          "caixa_px": {
+            "x": 64,
+            "y": 506,
+            "largura": 1152,
+            "altura": 128
+          },
+          "tamanho_pt": 18,
+          "minimo_pt": 16,
+          "fonte": "Fira Sans",
+          "cor": "18362E",
+          "negrito": false
+        },
+        {
+          "nome": "fontes",
+          "papel": "fonte",
+          "caixa_px": {
+            "x": 64,
+            "y": 670,
+            "largura": 1050,
+            "altura": 23
+          },
+          "tamanho_pt": 10.5,
+          "minimo_pt": 10.5,
+          "fonte": "Fira Sans",
+          "cor": "5B6965",
+          "negrito": false
+        }
+      ]
+    }
+  ]
+}
