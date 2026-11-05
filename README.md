@@ -1,5 +1,8 @@
 # Stats RAG
 
+Para executar como aplicativo web, consulte [DEPLOY.md](DEPLOY.md).
+A interface Streamlit reutiliza o índice salvo e permite consultar os livros e gerar slides.
+
 ## Visão geral
 
 O Stats RAG é um projeto de **RAG (Retrieval-Augmented Generation)** para estudar estatística a partir de capítulos de livros. O usuário faz uma pergunta, o sistema localiza trechos relacionados no corpus e utiliza essas evidências para gerar uma apresentação com referências às fontes.
