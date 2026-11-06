@@ -2,7 +2,7 @@
 
 import json
 import os
-from urllib.parse import quote, urlencode, urlsplit, urlunsplit
+from urllib.parse import quote, urlsplit, urlunsplit
 
 import streamlit as st
 
@@ -42,12 +42,6 @@ def catalogo_apresentacoes():
     return CatalogoApresentacoes()
 
 
-def link_apresentacao(tipo, identificador):
-    # Remove o caminho interno do iframe da hospedagem, preservando o domínio atual.
-    origem = urlsplit(st.context.url or "http://localhost:8501/")
-    return urlunsplit((origem.scheme, origem.netloc, "/", urlencode({tipo: identificador}), ""))
-
-
 def link_pdf(arquivo):
     origem = urlsplit(st.context.url or "http://localhost:8501/")
     # No Community Cloud, /~/+/ acessa o servidor de arquivos sem abrir a interface.
@@ -55,18 +49,53 @@ def link_pdf(arquivo):
     return urlunsplit((origem.scheme, origem.netloc, prefixo + "app/static/" + quote(arquivo, safe="/"), "", ""))
 
 
-def link_leitor(arquivo):
-    return link_pdf("apresentacao.html") + "?" + urlencode({"arquivo": arquivo})
-
-
 def abrir_pdf_direto(arquivo):
     # O link é uma alternativa caso o navegador impeça o redirecionamento automático.
-    st.link_button("Ver apresentação", link_leitor(arquivo), type="primary")
-    st.link_button("PDF direto", link_pdf(arquivo))
+    st.link_button("Ver apresentação", link_pdf(arquivo), type="primary")
     st.html(
-        f"<script>window.top.location.replace({json.dumps(link_leitor(arquivo))});</script>",
+        f"<script>window.top.location.replace({json.dumps(link_pdf(arquivo))});</script>",
         unsafe_allow_javascript=True,
     )
+
+
+def gerar_apresentacao(pedido, token):
+    with pedido.bloqueio:
+        if pedido.pdf is not None:
+            return
+        chave = configuracao("GEMINI_API_KEY")
+        if not chave:
+            st.warning("A geração está temporariamente indisponível.")
+            return
+        with st.spinner("Criando sua apresentação… O Gemini pode levar alguns minutos para responder."):
+            dados, _ = gerar_slides(
+                pedido.pergunta, pedido.resultados, chave=chave,
+                modelo=MODELO_GERACAO, tema=pedido.tema,
+                quantidade=pedido.quantidade, autor="",
+            )
+            if pedido.titulo:
+                dados["titulo"] = pedido.titulo
+                for slide in dados["slides"]:
+                    if slide["template_id"].endswith("_abertura"):
+                        slide["campos"]["titulo"] = pedido.titulo
+            pdf = compilar_pdf(dados, pedido.tema)
+            salvar_pdf(token, pdf)
+            pedido.pdf = pdf
+
+
+def exibir_geracao(pedido, token):
+    area_botao = st.empty()
+    if pedido.pdf is None and area_botao.button(
+        "Gerar apresentação", type="primary", disabled=not bool(configuracao("GEMINI_API_KEY")),
+    ):
+        try:
+            gerar_apresentacao(pedido, token)
+        except Exception as erro:
+            st.error(mensagem_erro(erro))
+            st.caption("Tente gerar novamente ou consulte as apresentações de exemplo.")
+    if pedido.pdf is not None:
+        area_botao.empty()
+        st.success("Sua apresentação está pronta!")
+        st.link_button("Ver apresentação", link_pdf(f"geradas/{token}.pdf"), type="primary")
 
 
 def abrir_pagina_apresentacao():
@@ -84,31 +113,7 @@ def abrir_pagina_apresentacao():
         if pedido is None:
             st.info("Este link expirou ou o servidor reiniciou. Volte à consulta e gere a apresentação novamente.")
             st.stop()
-        try:
-            with pedido.bloqueio:
-                if pedido.pdf is None:
-                    chave = configuracao("GEMINI_API_KEY")
-                    if not chave:
-                        st.warning("A geração está temporariamente indisponível.")
-                        st.stop()
-                    with st.spinner("Criando sua apresentação… O Gemini pode levar alguns minutos para responder."):
-                        dados, _ = gerar_slides(
-                            pedido.pergunta, pedido.resultados, chave=chave,
-                            modelo=MODELO_GERACAO, tema=pedido.tema,
-                            quantidade=pedido.quantidade, autor="",
-                        )
-                        if pedido.titulo:
-                            dados["titulo"] = pedido.titulo
-                            for slide in dados["slides"]:
-                                if slide["template_id"].endswith("_abertura"):
-                                    slide["campos"]["titulo"] = pedido.titulo
-                        pdf = compilar_pdf(dados, pedido.tema)
-                        salvar_pdf(token, pdf)
-                        pedido.pdf = pdf
-            abrir_pdf_direto(f"geradas/{token}.pdf")
-        except Exception as erro:
-            st.error(mensagem_erro(erro))
-            st.caption("Você pode tentar recarregar esta guia ou consultar os exemplos na página inicial.")
+        exibir_geracao(pedido, token)
         st.stop()
 
 
@@ -125,13 +130,12 @@ def exibir_exemplos():
             st.markdown(f"**{exemplo['titulo']}**")
             st.write(exemplo["pergunta"])
             st.link_button(
-                "Ver apresentação", link_leitor("apresentacoes/" + exemplo["arquivo"]),
-                width="stretch",
+                "Ver apresentação", link_pdf("apresentacoes/" + exemplo["arquivo"]),
+                type="primary", width="stretch",
             )
-            st.link_button("PDF direto", link_pdf("apresentacoes/" + exemplo["arquivo"]), width="stretch")
 
 
-# A guia da geração redireciona para o PDF final, sem carregar um leitor no Streamlit.
+# Mantém compatibilidade com links anteriores; novas gerações ocorrem na consulta.
 abrir_pagina_apresentacao()
 
 st.image(str(RAIZ / "assets/stats-rag.svg"), width=330)
@@ -199,7 +203,7 @@ with area_resposta:
             "Tema", ["pixel", "ufabc"],
             format_func=lambda v: {"pixel": "Pixel", "ufabc": "UFABC"}[v],
         )
-        quantidade = coluna_paginas.number_input("Número de páginas", min_value=2, max_value=8, value=4, step=1)
+        quantidade = coluna_paginas.slider("Número de páginas", min_value=2, max_value=8, value=4, step=1)
         titulo = coluna_titulo.text_input("Título", max_chars=60, placeholder="Título da apresentação (opcional)")
         assinatura = (consulta["pergunta"], tuple(r["chunk"]["chunk_id"] for r in resultados), tema, quantidade, titulo)
         catalogo = catalogo_apresentacoes()
@@ -212,11 +216,7 @@ with area_resposta:
             link_atual = {"assinatura": assinatura, "token": token}
             st.session_state.link_apresentacao = link_atual
         pedido = catalogo.obter(link_atual["token"])
-        st.link_button(
-            "Ver apresentação" if pedido.pdf is not None else "Gerar apresentação",
-            link_leitor(f"geradas/{link_atual['token']}.pdf") if pedido.pdf is not None else link_apresentacao("apresentacao", link_atual["token"]),
-            type="primary", disabled=not bool(chave),
-        )
+        exibir_geracao(pedido, link_atual["token"])
         if not chave:
             st.caption("A geração de novas apresentações está temporariamente indisponível. As apresentações de exemplo podem ser abertas abaixo.")
 

@@ -145,7 +145,7 @@ class InterfaceTest(unittest.TestCase):
         painel = next(e for e in app.expander if e.label == "Consultar as evidências encontradas")
         self.assertTrue(painel.proto.expanded)
         self.assertTrue(any("149 chunkings" == e.value for e in app.caption))
-        self.assertEqual(app.number_input[0].label, "Número de páginas")
+        self.assertEqual(app.slider[0].label, "Número de páginas")
         self.assertEqual(app.text_input[0].label, "Título")
         app.selectbox(key="pergunta").set_value(None)
         app.button[0].click().run()
@@ -160,10 +160,9 @@ class InterfaceTest(unittest.TestCase):
         links = [e.proto for e in app.get("link_button") if e.proto.label == "Ver apresentação"]
         diretos = [e.proto for e in app.get("link_button") if e.proto.label == "PDF direto"]
         self.assertEqual(len(links), 3)
-        self.assertEqual(len(diretos), 3)
+        self.assertEqual(len(diretos), 0)
         for exemplo in EXEMPLOS:
-            self.assertTrue(any(f"/app/static/apresentacoes/{exemplo['arquivo']}" in link.url for link in diretos))
-            self.assertTrue(any("/app/static/apresentacao.html?" in link.url and exemplo["arquivo"] in link.url for link in links))
+            self.assertTrue(any(f"/app/static/apresentacoes/{exemplo['arquivo']}" in link.url and link.type == "primary" for link in links))
             pagina = self.iniciar()
             pagina.query_params["exemplo"] = exemplo["id"]
             with patch("rag_web.cliente_gemini", side_effect=AssertionError("API inesperada")):
@@ -187,7 +186,7 @@ class InterfaceTest(unittest.TestCase):
             self.assertFalse(app.exception)
             self.assertEqual(consulta.call_args.kwargs["chave"], "chave-simulada")
 
-    def test_nova_guia_gera_pdf_uma_vez_com_titulo_e_gemini_36(self):
+    def test_gera_na_mesma_pagina_e_oferece_pdf_direto_sem_repetir_chamada(self):
         from web_conteudo import PERGUNTAS_SUGERIDAS
 
         resultados = buscar("cross-validation", carregar_corpus(), modo="Lexical (sem API)")
@@ -197,30 +196,30 @@ class InterfaceTest(unittest.TestCase):
             with patch("rag_web.buscar", return_value=resultados):
                 app.button[0].click().run()
             app.text_input[0].set_value("Minha apresentação").run()
-            app.number_input[0].set_value(5).run()
+            app.slider[0].set_value(5).run()
             token = app.session_state["link_apresentacao"]["token"]
-            link = next(e.proto for e in app.get("link_button") if e.proto.label == "Gerar apresentação")
-            self.assertIn(token, link.url)
-            self.assertNotIn("cross-validation", link.url)
+            self.assertTrue(any(e.label == "Gerar apresentação" for e in app.button))
+            self.assertFalse(any(e.proto.label == "Gerar apresentação" for e in app.get("link_button")))
             self.assertFalse(any("Conteúdo e referências" in e.label for e in app.expander))
-            pagina = self.iniciar()
-            pagina.query_params["apresentacao"] = token
             dados = {"titulo": "Gerado", "slides": [{"template_id": "pixel_abertura", "campos": {"titulo": "Gerado"}}]}
             with TemporaryDirectory() as pasta:
                 with patch("web_apresentacoes.PASTA_PDFS", Path(pasta)):
                     with patch("rag_web.gerar_slides", return_value=(dados, [])) as gerar:
                         with patch("rag_web.compilar_pdf", return_value=b"%PDF-simulado") as compilar:
-                            pagina.run()
-                            pagina.run()
+                            next(b for b in app.button if b.label == "Gerar apresentação").click().run()
+                            app.run()
                     self.assertEqual((Path(pasta) / f"{token}.pdf").read_bytes(), b"%PDF-simulado")
-                    self.assertTrue(any(f"/app/static/geradas/{token}.pdf" in e.proto.url for e in pagina.get("link_button")))
-            self.assertFalse(pagina.exception)
+                    self.assertTrue(any(f"/app/static/geradas/{token}.pdf" in e.proto.url for e in app.get("link_button")))
+            self.assertFalse(app.exception)
+            self.assertTrue(app.success)
+            self.assertFalse(app.query_params)
+            self.assertTrue(app.selectbox)
+            self.assertFalse(any(b.label == "Gerar apresentação" for b in app.button))
             self.assertEqual(gerar.call_count, 1)
             self.assertEqual(gerar.call_args.kwargs["modelo"], "gemini-3.6-flash")
             self.assertEqual(gerar.call_args.kwargs["quantidade"], 5)
             self.assertEqual(compilar.call_args.args[0]["titulo"], "Minha apresentação")
             self.assertEqual(compilar.call_args.args[0]["slides"][0]["campos"]["titulo"], "Minha apresentação")
-            self.assertFalse(pagina.selectbox)
 
     def test_link_invalido_nao_chama_api(self):
         pagina = self.iniciar()
@@ -230,13 +229,32 @@ class InterfaceTest(unittest.TestCase):
         self.assertFalse(pagina.exception)
         self.assertTrue(pagina.info)
 
+    def test_falha_na_geracao_mantem_consulta_e_permite_tentar_novamente(self):
+        from web_conteudo import PERGUNTAS_SUGERIDAS
+
+        resultados = buscar("cross-validation", carregar_corpus(), modo="Lexical (sem API)")
+        with patch.dict("os.environ", {"GEMINI_API_KEY": "chave-simulada"}):
+            app = self.iniciar().run()
+            app.selectbox(key="pergunta").select(PERGUNTAS_SUGERIDAS[0])
+            with patch("rag_web.buscar", return_value=resultados):
+                app.button[0].click().run()
+            token = app.session_state["link_apresentacao"]["token"]
+            with patch("rag_web.gerar_slides", side_effect=RuntimeError("Falha simulada")):
+                next(b for b in app.button if b.label == "Gerar apresentação").click().run()
+            self.assertFalse(app.exception)
+            self.assertTrue(app.error)
+            self.assertTrue(app.session_state["consulta_atual"])
+            self.assertEqual(app.session_state["link_apresentacao"]["token"], token)
+            self.assertTrue(any(b.label == "Gerar apresentação" for b in app.button))
+            self.assertFalse(any("/geradas/" in e.proto.url for e in app.get("link_button")))
+
     def test_links_publicos_usam_arquivos_sem_interface_do_streamlit(self):
         app = self.iniciar()
         app.context["url"] = "https://stats-rag.streamlit.app/"
         app.run()
         self.assertFalse(app.exception)
         links = [e.proto for e in app.get("link_button")]
-        self.assertEqual(len(links), 6)
+        self.assertEqual(len(links), 3)
         self.assertTrue(all(e.url.startswith("https://stats-rag.streamlit.app/~/+/app/static/") for e in links))
 
 

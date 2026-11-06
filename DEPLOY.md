@@ -35,25 +35,27 @@ os chunks e os vetores da pasta `artifacts/`, verifica seus hashes e reutiliza o
 
 Cada busca híbrida gera apenas o embedding da pergunta, usando exatamente o modelo,
 a dimensão e o formato do manifesto. BM25, cosseno e RRF rodam no servidor. O usuário
-pode inspecionar os trechos, gerar slides com as três primeiras evidências e baixar
-PDF, JSON e referências. A compilação Typst usa arquivos temporários separados por
+pode inspecionar os trechos e gerar slides com as três primeiras evidências.
+A compilação Typst usa arquivos temporários separados por
 operação; resultados não são gravados nos artefatos.
 
 O campo da pergunta oferece oito sugestões e aceita perguntas livres. Depois da
 consulta, as evidências são expandidas automaticamente. Tema, número de páginas e
-título ficam em três colunas. Os botões de apresentação abrem uma nova guia com
-um leitor estático leve, sem interface Streamlit nem conteúdo dos slides na
-página da consulta. A opção **PDF direto** abre o arquivo nativo, e **Baixar PDF**
-permite salvá-lo. O leitor estático usa PDF.js 6.5.438, com módulos e licença em
-`static/vendor/pdfjs/`; renderiza uma página por vez, sem sessão Python, React,
-CDN externa ou chamada ao Gemini. Os PDFs ficam em `static/apresentacoes/`.
+título ficam em três colunas, com controle deslizante para o número de páginas.
+**Gerar apresentação** executa na própria página e mostra um indicador de
+carregamento. Ao concluir, aparece uma confirmação e o botão **Ver apresentação**,
+que abre diretamente o PDF em nova guia. Os exemplos têm somente esse botão,
+com fundo verde, também apontando para o PDF direto em nova guia. O aplicativo
+não carrega o conteúdo dos slides na página da consulta. Os PDFs dos exemplos
+ficam em `static/apresentacoes/`.
 O recurso usa `server.enableStaticServing = true` em `.streamlit/config.toml`.
 
 Os pedidos de geração ficam em um catálogo temporário em memória, limitado a 32
-apresentações por uma hora. A guia nova recupera o pedido por um identificador
-aleatório; perguntas, evidências e credenciais não são colocadas na URL. Reabrir
-um PDF já gerado reutiliza o resultado. A página da geração redireciona para o
-arquivo final em `static/geradas/`, pasta ignorada pelo Git. Os PDFs gerados são
+apresentações por uma hora. O pedido usa um identificador aleatório; perguntas,
+evidências e credenciais não são colocadas na URL. Alterar os controles não
+inicia a geração; é necessário clicar no botão. Reabrir um PDF já gerado reutiliza
+o resultado. O arquivo final fica em `static/geradas/`, pasta ignorada pelo Git.
+Os PDFs gerados são
 temporários e removidos quando o catálogo limpa pedidos expirados ou excedentes;
 os exemplos permanecem disponíveis. Baixe o PDF para guardá-lo.
 

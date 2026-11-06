@@ -1,4 +1,4 @@
-"""Pedidos temporários para abrir apresentações em outra sessão do navegador."""
+"""Pedidos temporários para gerar e publicar apresentações sem repetir chamadas."""
 
 from dataclasses import dataclass, field
 from pathlib import Path
