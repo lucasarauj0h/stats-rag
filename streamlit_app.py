@@ -1,12 +1,13 @@
 """Interface web do Stats RAG. Execute com: streamlit run streamlit_app.py."""
 
+import json
 import os
 from urllib.parse import quote, urlencode, urlsplit, urlunsplit
 
 import streamlit as st
 
 from rag_web import RAIZ, buscar, carregar_corpus, compilar_pdf, gerar_slides, mensagem_erro
-from web_apresentacoes import CatalogoApresentacoes
+from web_apresentacoes import CatalogoApresentacoes, salvar_pdf
 from web_conteudo import EXEMPLOS, MODELO_GERACAO, PERGUNTAS_SUGERIDAS
 
 
@@ -47,10 +48,23 @@ def link_apresentacao(tipo, identificador):
     return urlunsplit((origem.scheme, origem.netloc, "/", urlencode({tipo: identificador}), ""))
 
 
-def exibir_pdf(pdf, titulo, arquivo):
-    st.subheader(titulo)
-    st.pdf(pdf, height=800, key="leitor_apresentacao", alt=titulo)
-    st.download_button("Baixar PDF", pdf, file_name=arquivo, mime="application/pdf")
+def link_pdf(arquivo):
+    origem = urlsplit(st.context.url or "http://localhost:8501/")
+    return urlunsplit((origem.scheme, origem.netloc, "/app/static/" + quote(arquivo, safe="/"), "", ""))
+
+
+def link_leitor(arquivo):
+    return link_pdf("apresentacao.html") + "?" + urlencode({"arquivo": arquivo})
+
+
+def abrir_pdf_direto(arquivo):
+    # O link é uma alternativa caso o navegador impeça o redirecionamento automático.
+    st.link_button("Ver apresentação", link_leitor(arquivo), type="primary")
+    st.link_button("PDF direto", link_pdf(arquivo))
+    st.html(
+        f"<script>window.top.location.replace({json.dumps(link_leitor(arquivo))});</script>",
+        unsafe_allow_javascript=True,
+    )
 
 
 def abrir_pagina_apresentacao():
@@ -61,8 +75,7 @@ def abrir_pagina_apresentacao():
         if exemplo is None:
             st.error("Apresentação não encontrada.")
         else:
-            pdf = (RAIZ / "exemplos" / exemplo["arquivo"]).read_bytes()
-            exibir_pdf(pdf, exemplo["titulo"], exemplo["arquivo"])
+            abrir_pdf_direto("apresentacoes/" + exemplo["arquivo"])
         st.stop()
     if token:
         pedido = catalogo_apresentacoes().obter(token)
@@ -87,8 +100,10 @@ def abrir_pagina_apresentacao():
                             for slide in dados["slides"]:
                                 if slide["template_id"].endswith("_abertura"):
                                     slide["campos"]["titulo"] = pedido.titulo
-                        pedido.pdf = compilar_pdf(dados, pedido.tema)
-            exibir_pdf(pedido.pdf, pedido.titulo or "Sua apresentação", "apresentacao_rag.pdf")
+                        pdf = compilar_pdf(dados, pedido.tema)
+                        salvar_pdf(token, pdf)
+                        pedido.pdf = pdf
+            abrir_pdf_direto(f"geradas/{token}.pdf")
         except Exception as erro:
             st.error(mensagem_erro(erro))
             st.caption("Você pode tentar recarregar esta guia ou consultar os exemplos na página inicial.")
@@ -108,12 +123,13 @@ def exibir_exemplos():
             st.markdown(f"**{exemplo['titulo']}**")
             st.write(exemplo["pergunta"])
             st.link_button(
-                "Ver apresentação", link_apresentacao("exemplo", exemplo["id"]),
+                "Ver apresentação", link_leitor("apresentacoes/" + exemplo["arquivo"]),
                 width="stretch",
             )
+            st.link_button("PDF direto", link_pdf("apresentacoes/" + exemplo["arquivo"]), width="stretch")
 
 
-# A guia do slide mostra apenas o leitor; não repete a interface de consulta.
+# A guia da geração redireciona para o PDF final, sem carregar um leitor no Streamlit.
 abrir_pagina_apresentacao()
 
 st.image(str(RAIZ / "assets/stats-rag.svg"), width=330)
@@ -196,7 +212,7 @@ with area_resposta:
         pedido = catalogo.obter(link_atual["token"])
         st.link_button(
             "Ver apresentação" if pedido.pdf is not None else "Gerar apresentação",
-            link_apresentacao("apresentacao", link_atual["token"]),
+            link_leitor(f"geradas/{link_atual['token']}.pdf") if pedido.pdf is not None else link_apresentacao("apresentacao", link_atual["token"]),
             type="primary", disabled=not bool(chave),
         )
         if not chave:

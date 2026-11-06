@@ -2,6 +2,8 @@
 
 import copy
 import json
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from types import SimpleNamespace
 import unittest
 from unittest.mock import MagicMock, patch
@@ -156,17 +158,21 @@ class InterfaceTest(unittest.TestCase):
 
         app = self.iniciar().run()
         links = [e.proto for e in app.get("link_button") if e.proto.label == "Ver apresentação"]
+        diretos = [e.proto for e in app.get("link_button") if e.proto.label == "PDF direto"]
         self.assertEqual(len(links), 3)
+        self.assertEqual(len(diretos), 3)
         for exemplo in EXEMPLOS:
-            self.assertTrue(any(f"exemplo={exemplo['id']}" in link.url for link in links))
+            self.assertTrue(any(f"/app/static/apresentacoes/{exemplo['arquivo']}" in link.url for link in diretos))
+            self.assertTrue(any("/app/static/apresentacao.html?" in link.url and exemplo["arquivo"] in link.url for link in links))
             pagina = self.iniciar()
             pagina.query_params["exemplo"] = exemplo["id"]
             with patch("rag_web.cliente_gemini", side_effect=AssertionError("API inesperada")):
                 pagina.run()
             self.assertFalse(pagina.exception)
-            self.assertEqual(pagina.subheader[0].value, exemplo["titulo"])
+            self.assertFalse(pagina.subheader)
             self.assertFalse(pagina.selectbox)
-            self.assertTrue((RAIZ / "exemplos" / exemplo["arquivo"]).read_bytes().startswith(b"%PDF"))
+            self.assertTrue(any(exemplo["arquivo"] in e.proto.url for e in pagina.get("link_button")))
+            self.assertTrue((RAIZ / "static/apresentacoes" / exemplo["arquivo"]).read_bytes().startswith(b"%PDF"))
 
     def test_chave_do_servidor_e_usada_sem_campo_para_visitante(self):
         from web_conteudo import PERGUNTAS_SUGERIDAS
@@ -200,10 +206,14 @@ class InterfaceTest(unittest.TestCase):
             pagina = self.iniciar()
             pagina.query_params["apresentacao"] = token
             dados = {"titulo": "Gerado", "slides": [{"template_id": "pixel_abertura", "campos": {"titulo": "Gerado"}}]}
-            with patch("rag_web.gerar_slides", return_value=(dados, [])) as gerar:
-                with patch("rag_web.compilar_pdf", return_value=b"%PDF-simulado") as compilar:
-                    pagina.run()
-                    pagina.run()
+            with TemporaryDirectory() as pasta:
+                with patch("web_apresentacoes.PASTA_PDFS", Path(pasta)):
+                    with patch("rag_web.gerar_slides", return_value=(dados, [])) as gerar:
+                        with patch("rag_web.compilar_pdf", return_value=b"%PDF-simulado") as compilar:
+                            pagina.run()
+                            pagina.run()
+                    self.assertEqual((Path(pasta) / f"{token}.pdf").read_bytes(), b"%PDF-simulado")
+                    self.assertTrue(any(f"/app/static/geradas/{token}.pdf" in e.proto.url for e in pagina.get("link_button")))
             self.assertFalse(pagina.exception)
             self.assertEqual(gerar.call_count, 1)
             self.assertEqual(gerar.call_args.kwargs["modelo"], "gemini-3.6-flash")
@@ -239,13 +249,23 @@ class CatalogoTest(unittest.TestCase):
         self.assertIsNotNone(catalogo.obter(terceiro))
 
     def test_pedidos_expiram(self):
-        from web_apresentacoes import CatalogoApresentacoes
+        from web_apresentacoes import CatalogoApresentacoes, salvar_pdf
 
         catalogo = CatalogoApresentacoes(duracao=60)
         token = catalogo.adicionar(**self.dados("Teste"))
         pedido = catalogo.obter(token)
-        pedido.criado_em -= 61
-        self.assertIsNone(catalogo.obter(token))
+        with TemporaryDirectory() as pasta:
+            with patch("web_apresentacoes.PASTA_PDFS", Path(pasta)):
+                salvar_pdf(token, b"%PDF-teste")
+                pedido.criado_em -= 61
+                self.assertIsNone(catalogo.obter(token))
+                self.assertFalse((Path(pasta) / f"{token}.pdf").exists())
+
+    def test_salvar_pdf_rejeita_caminho_fora_da_pasta(self):
+        from web_apresentacoes import salvar_pdf
+
+        with self.assertRaises(ValueError):
+            salvar_pdf("../arquivo", b"%PDF-teste")
 
 
 if __name__ == "__main__":

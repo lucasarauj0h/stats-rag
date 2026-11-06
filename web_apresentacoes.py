@@ -1,9 +1,26 @@
 """Pedidos temporários para abrir apresentações em outra sessão do navegador."""
 
 from dataclasses import dataclass, field
+from pathlib import Path
 from secrets import token_urlsafe
 from threading import Lock
 from time import monotonic
+
+PASTA_PDFS = Path(__file__).resolve().parent / "static" / "geradas"
+
+
+def salvar_pdf(token, pdf):
+    """Publica somente o PDF final em um endereço aleatório, sem credenciais."""
+    if not token or any(c not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-" for c in token):
+        raise ValueError("Identificador de apresentação inválido.")
+    PASTA_PDFS.mkdir(parents=True, exist_ok=True)
+    temporario = PASTA_PDFS / f"{token}.tmp"
+    temporario.write_bytes(pdf)
+    temporario.replace(PASTA_PDFS / f"{token}.pdf")
+
+
+def remover_pdf(token):
+    (PASTA_PDFS / f"{token}.pdf").unlink(missing_ok=True)
 
 
 @dataclass
@@ -29,10 +46,10 @@ class CatalogoApresentacoes:
 
     def _limpar(self):
         agora = monotonic()
-        self._pedidos = {
-            token: pedido for token, pedido in self._pedidos.items()
-            if agora - pedido.criado_em < self.duracao
-        }
+        expirados = [token for token, pedido in self._pedidos.items() if agora - pedido.criado_em >= self.duracao]
+        for token in expirados:
+            remover_pdf(token)
+            del self._pedidos[token]
 
     def adicionar(self, **dados):
         pedido = PedidoApresentacao(**dados)
@@ -40,6 +57,7 @@ class CatalogoApresentacoes:
             self._limpar()
             if len(self._pedidos) >= self.limite:
                 antigo = min(self._pedidos, key=lambda token: self._pedidos[token].criado_em)
+                remover_pdf(antigo)
                 del self._pedidos[antigo]
             token = token_urlsafe(32)
             self._pedidos[token] = pedido

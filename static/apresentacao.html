@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Apresentação · stats-rag</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #e9edeb; color: #152c27; font: 15px system-ui, sans-serif; }
+    header { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 12px 18px; background: #fff; border-bottom: 1px solid #d3ded8; }
+    a { color: #126a58; text-decoration: none; }
+    .marca { font-size: 21px; font-weight: 750; letter-spacing: -.5px; }
+    nav { display: flex; gap: 12px; align-items: center; }
+    button { cursor: pointer; border: 1px solid #c2d0c8; border-radius: 7px; padding: 7px 12px; background: #fff; color: #152c27; font: inherit; }
+    button:disabled { opacity: .4; cursor: default; }
+    #paginas { min-width: 48px; text-align: center; }
+    main { min-height: 60vh; display: grid; place-items: center; padding: 12px; }
+    canvas { display: block; max-width: 100%; box-shadow: 0 3px 20px #152c2720; }
+    #status { padding: 16px; text-align: center; }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="marca" href="/">stats-rag</a>
+    <nav aria-label="Páginas da apresentação">
+      <button id="anterior" aria-label="Página anterior" disabled>←</button>
+      <span id="paginas" aria-live="polite">—</span>
+      <button id="proxima" aria-label="Próxima página" disabled>→</button>
+    </nav>
+    <nav aria-label="Arquivo PDF">
+      <a id="direto" target="_blank" rel="noopener">PDF direto</a>
+      <a id="baixar" download>Baixar PDF</a>
+    </nav>
+  </header>
+  <p id="status" role="status">Carregando apresentação…</p>
+  <main><canvas id="slide" role="img" aria-label="Slide da apresentação" hidden></canvas></main>
+  <script type="module" src="./leitor.js"></script>
+</body>
+</html>
