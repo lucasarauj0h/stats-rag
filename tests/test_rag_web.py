@@ -230,6 +230,15 @@ class InterfaceTest(unittest.TestCase):
         self.assertFalse(pagina.exception)
         self.assertTrue(pagina.info)
 
+    def test_links_publicos_usam_arquivos_sem_interface_do_streamlit(self):
+        app = self.iniciar()
+        app.context["url"] = "https://stats-rag.streamlit.app/"
+        app.run()
+        self.assertFalse(app.exception)
+        links = [e.proto for e in app.get("link_button")]
+        self.assertEqual(len(links), 6)
+        self.assertTrue(all(e.url.startswith("https://stats-rag.streamlit.app/~/+/app/static/") for e in links))
+
 
 class CatalogoTest(unittest.TestCase):
     def dados(self, pergunta):

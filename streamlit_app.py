@@ -50,7 +50,9 @@ def link_apresentacao(tipo, identificador):
 
 def link_pdf(arquivo):
     origem = urlsplit(st.context.url or "http://localhost:8501/")
-    return urlunsplit((origem.scheme, origem.netloc, "/app/static/" + quote(arquivo, safe="/"), "", ""))
+    # No Community Cloud, /~/+/ acessa o servidor de arquivos sem abrir a interface.
+    prefixo = "/~/+/" if (origem.hostname or "").endswith(".streamlit.app") else "/"
+    return urlunsplit((origem.scheme, origem.netloc, prefixo + "app/static/" + quote(arquivo, safe="/"), "", ""))
 
 
 def link_leitor(arquivo):
