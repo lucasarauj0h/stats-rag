@@ -1,5 +1,7 @@
 # Stats RAG na web
 
+Aplicativo publicado: <https://stats-rag.streamlit.app/>.
+
 O aplicativo usa **Streamlit Community Cloud** para servir a interface e executar
 as consultas em Python no servidor. A hospedagem é gratuita; o Gemini depende da
 cota disponível na chave configurada. Não é necessário contratar Elasticsearch,
@@ -38,9 +40,16 @@ PDF, JSON e referências. A compilação Typst usa arquivos temporários separad
 operação; resultados não são gravados nos artefatos.
 
 O campo da pergunta oferece oito sugestões e aceita perguntas livres. Depois da
-consulta, a configuração do tema aparece antes das evidências. As apresentações
-prontas em `exemplos/` podem ser abertas no leitor PDF do próprio site sem chamadas
-ao Gemini. Seus arquivos são cópias dos PDFs fornecidos pelo responsável pelo projeto.
+consulta, as evidências são expandidas automaticamente. Tema, número de páginas e
+título ficam em três colunas. Os botões de apresentação abrem uma nova guia com
+o leitor PDF, sem exibir o JSON ou o conteúdo dos slides na página da consulta.
+Os exemplos em `exemplos/` abrem sem chamadas ao Gemini.
+
+Os pedidos de geração ficam em um catálogo temporário em memória, limitado a 32
+apresentações por uma hora. A guia nova recupera o pedido por um identificador
+aleatório; perguntas, evidências e credenciais não são colocadas na URL. Reabrir
+um PDF já gerado reutiliza o resultado. Links gerados expiram após uma hora ou ao
+reiniciar o servidor; os exemplos permanecem disponíveis. Baixe o PDF para guardá-lo.
 
 Mantenha extração, atualização do corpus e geração dos embeddings no notebook.
 Quando atualizar o índice, publique juntos o manifesto, chunks e vetores. Não é

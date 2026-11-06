@@ -1,16 +1,16 @@
 """Interface web do Stats RAG. Execute com: streamlit run streamlit_app.py."""
 
-import json
 import os
-from urllib.parse import quote
+from urllib.parse import quote, urlencode, urlsplit, urlunsplit
 
 import streamlit as st
 
 from rag_web import RAIZ, buscar, carregar_corpus, compilar_pdf, gerar_slides, mensagem_erro
+from web_apresentacoes import CatalogoApresentacoes
 from web_conteudo import EXEMPLOS, MODELO_GERACAO, PERGUNTAS_SUGERIDAS
 
 
-st.set_page_config(page_title="stats-rag · Da sua dúvida aos slides", page_icon="📚", layout="wide")
+st.set_page_config(page_title="stats-rag", page_icon="📚", layout="wide")
 st.markdown(
     """<style>
     [role="listbox"] [role="option"] {white-space: normal; height: auto;}
@@ -36,16 +36,63 @@ def indice_salvo(assinatura):
     return carregar_corpus()
 
 
-@st.dialog("Apresentação de exemplo", width="large")
-def abrir_exemplo(exemplo):
-    st.subheader(exemplo["titulo"])
-    st.write(exemplo["pergunta"])
-    pdf = (RAIZ / "exemplos" / exemplo["arquivo"]).read_bytes()
-    st.pdf(pdf, height=560, key=f"leitor_{exemplo['id']}", alt=exemplo["titulo"])
-    st.download_button(
-        "Baixar apresentação em PDF", pdf, file_name=exemplo["arquivo"],
-        mime="application/pdf", key=f"baixar_{exemplo['id']}",
-    )
+@st.cache_resource
+def catalogo_apresentacoes():
+    return CatalogoApresentacoes()
+
+
+def link_apresentacao(tipo, identificador):
+    # Remove o caminho interno do iframe da hospedagem, preservando o domínio atual.
+    origem = urlsplit(st.context.url or "http://localhost:8501/")
+    return urlunsplit((origem.scheme, origem.netloc, "/", urlencode({tipo: identificador}), ""))
+
+
+def exibir_pdf(pdf, titulo, arquivo):
+    st.subheader(titulo)
+    st.pdf(pdf, height=800, key="leitor_apresentacao", alt=titulo)
+    st.download_button("Baixar PDF", pdf, file_name=arquivo, mime="application/pdf")
+
+
+def abrir_pagina_apresentacao():
+    exemplo_id = st.query_params.get("exemplo")
+    token = st.query_params.get("apresentacao")
+    if exemplo_id:
+        exemplo = next((e for e in EXEMPLOS if e["id"] == exemplo_id), None)
+        if exemplo is None:
+            st.error("Apresentação não encontrada.")
+        else:
+            pdf = (RAIZ / "exemplos" / exemplo["arquivo"]).read_bytes()
+            exibir_pdf(pdf, exemplo["titulo"], exemplo["arquivo"])
+        st.stop()
+    if token:
+        pedido = catalogo_apresentacoes().obter(token)
+        if pedido is None:
+            st.info("Este link expirou ou o servidor reiniciou. Volte à consulta e gere a apresentação novamente.")
+            st.stop()
+        try:
+            with pedido.bloqueio:
+                if pedido.pdf is None:
+                    chave = configuracao("GEMINI_API_KEY")
+                    if not chave:
+                        st.warning("A geração está temporariamente indisponível.")
+                        st.stop()
+                    with st.spinner("Criando sua apresentação… O Gemini pode levar alguns minutos para responder."):
+                        dados, _ = gerar_slides(
+                            pedido.pergunta, pedido.resultados, chave=chave,
+                            modelo=MODELO_GERACAO, tema=pedido.tema,
+                            quantidade=pedido.quantidade, autor="",
+                        )
+                        if pedido.titulo:
+                            dados["titulo"] = pedido.titulo
+                            for slide in dados["slides"]:
+                                if slide["template_id"].endswith("_abertura"):
+                                    slide["campos"]["titulo"] = pedido.titulo
+                        pedido.pdf = compilar_pdf(dados, pedido.tema)
+            exibir_pdf(pedido.pdf, pedido.titulo or "Sua apresentação", "apresentacao_rag.pdf")
+        except Exception as erro:
+            st.error(mensagem_erro(erro))
+            st.caption("Você pode tentar recarregar esta guia ou consultar os exemplos na página inicial.")
+        st.stop()
 
 
 def exibir_exemplos():
@@ -60,11 +107,16 @@ def exibir_exemplos():
             st.caption(f"Capítulo {exemplo['capitulo']} · {exemplo['slides']} slides")
             st.markdown(f"**{exemplo['titulo']}**")
             st.write(exemplo["pergunta"])
-            if st.button("Abrir apresentação", key=f"exemplo_{exemplo['id']}", width="stretch"):
-                abrir_exemplo(exemplo)
+            st.link_button(
+                "Ver apresentação", link_apresentacao("exemplo", exemplo["id"]),
+                width="stretch",
+            )
 
 
-st.title("stats-rag: da sua dúvida aos slides")
+# A guia do slide mostra apenas o leitor; não repete a interface de consulta.
+abrir_pagina_apresentacao()
+
+st.image(str(RAIZ / "assets/stats-rag.svg"), width=330)
 st.write("Um agente que consulta os livros e cria uma apresentação para explicar sua dúvida de estatística.")
 
 try:
@@ -75,7 +127,6 @@ except Exception:
     st.stop()
 
 chunks, indice, _, _ = corpus
-# Credenciais vêm exclusivamente do servidor, nunca de campos da interface.
 st.session_state.pop("chave_visitante", None)
 chave = configuracao("GEMINI_API_KEY")
 with st.sidebar:
@@ -86,7 +137,7 @@ with st.sidebar:
     )
     st.markdown("O livro é disponibilizado gratuitamente em [statlearning.com](https://www.statlearning.com/).")
     st.markdown("**Capítulos disponíveis**\n\n5 · Resampling Methods\n\n7 · Moving Beyond Linearity\n\n8 · Tree-Based Methods")
-    st.caption(f"{len(chunks)} trechos para consultar")
+    st.caption(f"{len(chunks)} chunkings")
     with st.expander("Opções da busca"):
         modo = st.selectbox(
             "Como buscar", ["Híbrida", "Lexical (sem API)"], index=0 if chave else 1,
@@ -102,16 +153,15 @@ with st.form("consulta"):
         placeholder="Escreva sua pergunta ou escolha uma sugestão",
     )
     st.caption("Você pode perguntar em português ou inglês. Para escrever uma pergunta própria, digite e pressione Enter.")
-    enviar = st.form_submit_button("Buscar nos livros", type="primary")
+    enviar = st.form_submit_button("Buscar no livro", type="primary")
 
-# Reserva o lugar da resposta antes dos exemplos, visíveis durante a consulta.
 area_resposta = st.container()
 exibir_exemplos()
 
 with area_resposta:
     if enviar:
         st.session_state.pop("consulta_atual", None)
-        st.session_state.pop("apresentacao", None)
+        st.session_state.pop("link_apresentacao", None)
         if modo == "Híbrida" and not chave:
             st.warning("A busca por significado está temporariamente indisponível. Você pode buscar por palavras e explorar os exemplos.")
         else:
@@ -125,64 +175,39 @@ with area_resposta:
     consulta = st.session_state.get("consulta_atual")
     if consulta and consulta["resultados"]:
         resultados = consulta["resultados"]
-        st.subheader("Configure o tema da apresentação")
-        with st.form("slides"):
-            tema = st.selectbox(
-                "Tema", ["pixel", "ufabc"],
-                format_func=lambda v: {"pixel": "Pixel", "ufabc": "UFABC"}[v],
+        st.subheader("Configure sua apresentação")
+        coluna_tema, coluna_paginas, coluna_titulo = st.columns(3)
+        tema = coluna_tema.selectbox(
+            "Tema", ["pixel", "ufabc"],
+            format_func=lambda v: {"pixel": "Pixel", "ufabc": "UFABC"}[v],
+        )
+        quantidade = coluna_paginas.number_input("Número de páginas", min_value=2, max_value=8, value=4, step=1)
+        titulo = coluna_titulo.text_input("Título", max_chars=60, placeholder="Título da apresentação (opcional)")
+        assinatura = (consulta["pergunta"], tuple(r["chunk"]["chunk_id"] for r in resultados), tema, quantidade, titulo)
+        catalogo = catalogo_apresentacoes()
+        link_atual = st.session_state.get("link_apresentacao")
+        if not link_atual or link_atual["assinatura"] != assinatura or catalogo.obter(link_atual["token"]) is None:
+            token = catalogo.adicionar(
+                pergunta=consulta["pergunta"], resultados=resultados, tema=tema,
+                quantidade=quantidade, titulo=titulo,
             )
-            with st.expander("Mais opções"):
-                quantidade = st.slider("Máximo de slides", 2, 8, 4)
-                autor = st.text_input("Autor da apresentação", max_chars=100)
-            gerar = st.form_submit_button("Gerar apresentação", type="primary", disabled=not bool(chave))
+            link_atual = {"assinatura": assinatura, "token": token}
+            st.session_state.link_apresentacao = link_atual
+        pedido = catalogo.obter(link_atual["token"])
+        st.link_button(
+            "Ver apresentação" if pedido.pdf is not None else "Gerar apresentação",
+            link_apresentacao("apresentacao", link_atual["token"]),
+            type="primary", disabled=not bool(chave),
+        )
         if not chave:
             st.caption("A geração de novas apresentações está temporariamente indisponível. As apresentações de exemplo podem ser abertas abaixo.")
 
-        if gerar:
-            st.session_state.pop("apresentacao", None)
-            try:
-                with st.spinner("Criando a apresentação… O Gemini pode levar alguns minutos para responder."):
-                    dados, fontes = gerar_slides(
-                        consulta["pergunta"], resultados, chave=chave,
-                        modelo=MODELO_GERACAO,
-                        tema=tema, quantidade=quantidade, autor=autor,
-                    )
-                st.session_state.apresentacao = {"dados": dados, "fontes": fontes, "tema": tema}
-                with st.spinner("Preparando o PDF…"):
-                    st.session_state.apresentacao["pdf"] = compilar_pdf(dados, tema)
-            except Exception as erro:
-                st.error(mensagem_erro(erro))
-                if st.session_state.get("apresentacao"):
-                    st.warning("O conteúdo está disponível em JSON. O PDF não foi gerado; tente menos conteúdo por slide.")
-
-        apresentacao = st.session_state.get("apresentacao")
-        if apresentacao:
-            dados = apresentacao["dados"]
-            st.subheader(dados["titulo"])
-            if apresentacao.get("pdf"):
-                st.download_button("Baixar apresentação em PDF", apresentacao["pdf"], "apresentacao_rag.pdf", "application/pdf", type="primary")
-            with st.expander("Conteúdo e referências da apresentação"):
-                st.download_button(
-                    "Baixar conteúdo em JSON", json.dumps(dados, ensure_ascii=False, indent=2),
-                    "slides.json", "application/json",
-                )
-                st.download_button(
-                    "Baixar referências", json.dumps({"query": consulta["pergunta"], "fontes": apresentacao["fontes"]}, ensure_ascii=False, indent=2),
-                    "fontes.json", "application/json",
-                )
-                for n, slide in enumerate(dados["slides"], 1):
-                    st.markdown(f"**Slide {n} · {slide['campos']['titulo']}**")
-                    for campo, texto in slide["campos"].items():
-                        if campo not in {"titulo", "fontes", "autor"}:
-                            st.write(texto)
-                    st.caption(slide["campos"]["fontes"])
-
-        with st.expander("Consultar as evidências encontradas"):
+        with st.expander("Consultar as evidências encontradas", expanded=True):
             st.caption(f"Pergunta: {consulta['pergunta']}")
             for resultado in resultados:
                 c = resultado["chunk"]
                 paginas = ", ".join(map(str, c.get("pdf_pages", []))) or "não informadas"
-                with st.expander(f"[{resultado['referencia']}] {c['source']} · páginas {paginas}"):
+                with st.expander(f"[{resultado['referencia']}] {c['source']} · páginas {paginas}", expanded=resultado["referencia"] == "E1"):
                     st.caption(c.get("section_title") or "Seção não identificada")
                     st.text(c["content"])
                     caminho_pdf = RAIZ / "corpus" / c["source"]

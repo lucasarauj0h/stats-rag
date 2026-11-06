@@ -123,46 +123,56 @@ class RagWebTest(unittest.TestCase):
 
 
 class InterfaceTest(unittest.TestCase):
-    def test_consulta_lexical_e_limpeza_dos_resultados_anteriores(self):
+    def iniciar(self):
         from streamlit.testing.v1 import AppTest
+        return AppTest.from_file(str(RAIZ / "streamlit_app.py"), default_timeout=30)
+
+    def test_consulta_lexical_abre_evidencias_e_limpa_resultados_anteriores(self):
         from web_conteudo import PERGUNTAS_SUGERIDAS
 
-        app = AppTest.from_file(str(RAIZ / "streamlit_app.py"), default_timeout=30).run()
+        app = self.iniciar().run()
         self.assertFalse(app.exception)
         self.assertEqual(app.selectbox(key="modo_busca").value, "Lexical (sem API)")
         self.assertEqual(tuple(app.selectbox(key="pergunta").options), PERGUNTAS_SUGERIDAS)
         self.assertFalse(any("chave" in campo.label.lower() for campo in app.text_input))
+        self.assertEqual(app.button[0].label, "Buscar no livro")
         app.selectbox(key="pergunta").select(PERGUNTAS_SUGERIDAS[0])
         app.button[0].click().run()
         self.assertFalse(app.exception)
         self.assertTrue(app.session_state["consulta_atual"]["resultados"])
-        self.assertEqual(app.session_state["consulta_atual"]["pergunta"], PERGUNTAS_SUGERIDAS[0])
-        self.assertEqual(app.subheader[0].value, "Configure o tema da apresentação")
-        app.session_state["apresentacao"] = {"dados": {"titulo": "Antiga", "slides": []}}
+        painel = next(e for e in app.expander if e.label == "Consultar as evidências encontradas")
+        self.assertTrue(painel.proto.expanded)
+        self.assertTrue(any("149 chunkings" == e.value for e in app.caption))
+        self.assertEqual(app.number_input[0].label, "Número de páginas")
+        self.assertEqual(app.text_input[0].label, "Título")
         app.selectbox(key="pergunta").set_value(None)
         app.button[0].click().run()
         self.assertFalse(app.exception)
         self.assertNotIn("consulta_atual", app.session_state)
-        self.assertNotIn("apresentacao", app.session_state)
+        self.assertNotIn("link_apresentacao", app.session_state)
 
-    def test_exemplos_abrem_sem_chave_e_sem_chamar_o_gemini(self):
-        from streamlit.testing.v1 import AppTest
+    def test_exemplos_sao_links_e_abrem_sem_chamar_o_gemini(self):
         from web_conteudo import EXEMPLOS
 
+        app = self.iniciar().run()
+        links = [e.proto for e in app.get("link_button") if e.proto.label == "Ver apresentação"]
+        self.assertEqual(len(links), 3)
         for exemplo in EXEMPLOS:
+            self.assertTrue(any(f"exemplo={exemplo['id']}" in link.url for link in links))
+            pagina = self.iniciar()
+            pagina.query_params["exemplo"] = exemplo["id"]
             with patch("rag_web.cliente_gemini", side_effect=AssertionError("API inesperada")):
-                app = AppTest.from_file(str(RAIZ / "streamlit_app.py"), default_timeout=30).run()
-                app.button(key=f"exemplo_{exemplo['id']}").click().run()
-            self.assertFalse(app.exception)
-            self.assertIn(exemplo["titulo"], [h.value for h in app.subheader])
+                pagina.run()
+            self.assertFalse(pagina.exception)
+            self.assertEqual(pagina.subheader[0].value, exemplo["titulo"])
+            self.assertFalse(pagina.selectbox)
             self.assertTrue((RAIZ / "exemplos" / exemplo["arquivo"]).read_bytes().startswith(b"%PDF"))
 
     def test_chave_do_servidor_e_usada_sem_campo_para_visitante(self):
-        from streamlit.testing.v1 import AppTest
         from web_conteudo import PERGUNTAS_SUGERIDAS
 
         with patch.dict("os.environ", {"GEMINI_API_KEY": "chave-simulada"}):
-            app = AppTest.from_file(str(RAIZ / "streamlit_app.py"), default_timeout=30).run()
+            app = self.iniciar().run()
             self.assertEqual(app.selectbox(key="modo_busca").value, "Híbrida")
             self.assertFalse(any("chave" in campo.label.lower() for campo in app.text_input))
             app.selectbox(key="pergunta").select(PERGUNTAS_SUGERIDAS[1])
@@ -171,21 +181,71 @@ class InterfaceTest(unittest.TestCase):
             self.assertFalse(app.exception)
             self.assertEqual(consulta.call_args.kwargs["chave"], "chave-simulada")
 
-    def test_apresentacao_da_interface_usa_gemini_36(self):
-        from streamlit.testing.v1 import AppTest
+    def test_nova_guia_gera_pdf_uma_vez_com_titulo_e_gemini_36(self):
         from web_conteudo import PERGUNTAS_SUGERIDAS
 
         resultados = buscar("cross-validation", carregar_corpus(), modo="Lexical (sem API)")
-        with patch.dict("os.environ", {"GEMINI_API_KEY": "chave-simulada", "GEMINI_MODEL": "modelo-anterior"}):
-            app = AppTest.from_file(str(RAIZ / "streamlit_app.py"), default_timeout=30).run()
+        with patch.dict("os.environ", {"GEMINI_API_KEY": "chave-simulada"}):
+            app = self.iniciar().run()
             app.selectbox(key="pergunta").select(PERGUNTAS_SUGERIDAS[0])
             with patch("rag_web.buscar", return_value=resultados):
                 app.button[0].click().run()
-            with patch("rag_web.gerar_slides", return_value=({"titulo": "Teste", "slides": []}, [])) as gerar:
-                with patch("rag_web.compilar_pdf", return_value=b"%PDF-simulado"):
-                    next(b for b in app.button if b.label == "Gerar apresentação").click().run()
-            self.assertFalse(app.exception)
+            app.text_input[0].set_value("Minha apresentação").run()
+            app.number_input[0].set_value(5).run()
+            token = app.session_state["link_apresentacao"]["token"]
+            link = next(e.proto for e in app.get("link_button") if e.proto.label == "Gerar apresentação")
+            self.assertIn(token, link.url)
+            self.assertNotIn("cross-validation", link.url)
+            self.assertFalse(any("Conteúdo e referências" in e.label for e in app.expander))
+            pagina = self.iniciar()
+            pagina.query_params["apresentacao"] = token
+            dados = {"titulo": "Gerado", "slides": [{"template_id": "pixel_abertura", "campos": {"titulo": "Gerado"}}]}
+            with patch("rag_web.gerar_slides", return_value=(dados, [])) as gerar:
+                with patch("rag_web.compilar_pdf", return_value=b"%PDF-simulado") as compilar:
+                    pagina.run()
+                    pagina.run()
+            self.assertFalse(pagina.exception)
+            self.assertEqual(gerar.call_count, 1)
             self.assertEqual(gerar.call_args.kwargs["modelo"], "gemini-3.6-flash")
+            self.assertEqual(gerar.call_args.kwargs["quantidade"], 5)
+            self.assertEqual(compilar.call_args.args[0]["titulo"], "Minha apresentação")
+            self.assertEqual(compilar.call_args.args[0]["slides"][0]["campos"]["titulo"], "Minha apresentação")
+            self.assertFalse(pagina.selectbox)
+
+    def test_link_invalido_nao_chama_api(self):
+        pagina = self.iniciar()
+        pagina.query_params["apresentacao"] = "inexistente"
+        with patch("rag_web.cliente_gemini", side_effect=AssertionError("API inesperada")):
+            pagina.run()
+        self.assertFalse(pagina.exception)
+        self.assertTrue(pagina.info)
+
+
+class CatalogoTest(unittest.TestCase):
+    def dados(self, pergunta):
+        return dict(pergunta=pergunta, resultados=[], tema="pixel", quantidade=4, titulo="")
+
+    def test_tokens_separam_visitantes_e_limite_remove_o_mais_antigo(self):
+        from web_apresentacoes import CatalogoApresentacoes
+
+        catalogo = CatalogoApresentacoes(limite=2)
+        primeiro = catalogo.adicionar(**self.dados("Pergunta de A"))
+        segundo = catalogo.adicionar(**self.dados("Pergunta de B"))
+        self.assertNotEqual(primeiro, segundo)
+        self.assertEqual(catalogo.obter(primeiro).pergunta, "Pergunta de A")
+        terceiro = catalogo.adicionar(**self.dados("Pergunta de C"))
+        self.assertIsNone(catalogo.obter(primeiro))
+        self.assertEqual(catalogo.obter(segundo).pergunta, "Pergunta de B")
+        self.assertIsNotNone(catalogo.obter(terceiro))
+
+    def test_pedidos_expiram(self):
+        from web_apresentacoes import CatalogoApresentacoes
+
+        catalogo = CatalogoApresentacoes(duracao=60)
+        token = catalogo.adicionar(**self.dados("Teste"))
+        pedido = catalogo.obter(token)
+        pedido.criado_em -= 61
+        self.assertIsNone(catalogo.obter(token))
 
 
 if __name__ == "__main__":

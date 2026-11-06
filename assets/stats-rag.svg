@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 84" width="330" height="84" style="width:100%;height:auto;display:block" role="img" aria-label="stats-rag">
+  <title>stats-rag</title>
+  <g fill="none" stroke="#16866f" stroke-width="3" stroke-linejoin="round">
+    <path d="M15 22V13h43v9" opacity=".35"/>
+    <path d="M9 30V21h55v9" opacity=".6"/>
+    <rect x="3" y="29" width="68" height="45" rx="8" fill="#e4f2ec"/>
+    <path d="m16 60 13-13 13 7 16-13" stroke-linecap="round"/>
+  </g>
+  <g fill="#16866f"><circle cx="16" cy="60" r="3.5"/><circle cx="29" cy="47" r="3.5"/><circle cx="42" cy="54" r="3.5"/><circle cx="58" cy="41" r="3.5"/></g>
+  <text x="94" y="61" fill="#152c27" font-family="Inter, system-ui, sans-serif" font-size="49" font-weight="750" letter-spacing="-1.5">stats-rag</text>
+</svg>
