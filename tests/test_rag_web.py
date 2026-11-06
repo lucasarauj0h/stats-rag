@@ -125,20 +125,67 @@ class RagWebTest(unittest.TestCase):
 class InterfaceTest(unittest.TestCase):
     def test_consulta_lexical_e_limpeza_dos_resultados_anteriores(self):
         from streamlit.testing.v1 import AppTest
+        from web_conteudo import PERGUNTAS_SUGERIDAS
 
         app = AppTest.from_file(str(RAIZ / "streamlit_app.py"), default_timeout=30).run()
         self.assertFalse(app.exception)
-        self.assertEqual(app.selectbox[0].value, "Lexical (sem API)")
-        app.text_area[0].set_value("cross-validation LOOCV")
+        self.assertEqual(app.selectbox(key="modo_busca").value, "Lexical (sem API)")
+        self.assertEqual(tuple(app.selectbox(key="pergunta").options), PERGUNTAS_SUGERIDAS)
+        self.assertFalse(any("chave" in campo.label.lower() for campo in app.text_input))
+        app.selectbox(key="pergunta").select(PERGUNTAS_SUGERIDAS[0])
         app.button[0].click().run()
         self.assertFalse(app.exception)
         self.assertTrue(app.session_state["consulta_atual"]["resultados"])
+        self.assertEqual(app.session_state["consulta_atual"]["pergunta"], PERGUNTAS_SUGERIDAS[0])
+        self.assertEqual(app.subheader[0].value, "Configure o tema da apresentação")
         app.session_state["apresentacao"] = {"dados": {"titulo": "Antiga", "slides": []}}
-        app.text_area[0].set_value("zzzzzzzzzzxyz")
+        app.selectbox(key="pergunta").set_value(None)
         app.button[0].click().run()
         self.assertFalse(app.exception)
-        self.assertFalse(app.session_state["consulta_atual"]["resultados"])
+        self.assertNotIn("consulta_atual", app.session_state)
         self.assertNotIn("apresentacao", app.session_state)
+
+    def test_exemplos_abrem_sem_chave_e_sem_chamar_o_gemini(self):
+        from streamlit.testing.v1 import AppTest
+        from web_conteudo import EXEMPLOS
+
+        for exemplo in EXEMPLOS:
+            with patch("rag_web.cliente_gemini", side_effect=AssertionError("API inesperada")):
+                app = AppTest.from_file(str(RAIZ / "streamlit_app.py"), default_timeout=30).run()
+                app.button(key=f"exemplo_{exemplo['id']}").click().run()
+            self.assertFalse(app.exception)
+            self.assertIn(exemplo["titulo"], [h.value for h in app.subheader])
+            self.assertTrue((RAIZ / "exemplos" / exemplo["arquivo"]).read_bytes().startswith(b"%PDF"))
+
+    def test_chave_do_servidor_e_usada_sem_campo_para_visitante(self):
+        from streamlit.testing.v1 import AppTest
+        from web_conteudo import PERGUNTAS_SUGERIDAS
+
+        with patch.dict("os.environ", {"GEMINI_API_KEY": "chave-simulada"}):
+            app = AppTest.from_file(str(RAIZ / "streamlit_app.py"), default_timeout=30).run()
+            self.assertEqual(app.selectbox(key="modo_busca").value, "Híbrida")
+            self.assertFalse(any("chave" in campo.label.lower() for campo in app.text_input))
+            app.selectbox(key="pergunta").select(PERGUNTAS_SUGERIDAS[1])
+            with patch("rag_web.buscar", return_value=[]) as consulta:
+                app.button[0].click().run()
+            self.assertFalse(app.exception)
+            self.assertEqual(consulta.call_args.kwargs["chave"], "chave-simulada")
+
+    def test_apresentacao_da_interface_usa_gemini_36(self):
+        from streamlit.testing.v1 import AppTest
+        from web_conteudo import PERGUNTAS_SUGERIDAS
+
+        resultados = buscar("cross-validation", carregar_corpus(), modo="Lexical (sem API)")
+        with patch.dict("os.environ", {"GEMINI_API_KEY": "chave-simulada", "GEMINI_MODEL": "modelo-anterior"}):
+            app = AppTest.from_file(str(RAIZ / "streamlit_app.py"), default_timeout=30).run()
+            app.selectbox(key="pergunta").select(PERGUNTAS_SUGERIDAS[0])
+            with patch("rag_web.buscar", return_value=resultados):
+                app.button[0].click().run()
+            with patch("rag_web.gerar_slides", return_value=({"titulo": "Teste", "slides": []}, [])) as gerar:
+                with patch("rag_web.compilar_pdf", return_value=b"%PDF-simulado"):
+                    next(b for b in app.button if b.label == "Gerar apresentação").click().run()
+            self.assertFalse(app.exception)
+            self.assertEqual(gerar.call_args.kwargs["modelo"], "gemini-3.6-flash")
 
 
 if __name__ == "__main__":

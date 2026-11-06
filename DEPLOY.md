@@ -13,9 +13,10 @@ banco vetorial ou outra hospedagem para o backend.
    e arquivo de entrada `streamlit_app.py`.
 4. Em **Advanced settings**, selecione **Python 3.12**. Se quiser disponibilizar
    uma chave compartilhada, configure `GEMINI_API_KEY` no campo **Secrets**.
-   Sem ela, cada visitante pode usar sua própria chave; a busca lexical funciona
-   sem API. O modelo de geração padrão é `gemini-3.8-flash`, como no notebook;
-   para trocá-lo, configure `GEMINI_MODEL` nesse mesmo painel.
+   A chave é usada exclusivamente no servidor; os visitantes não precisam informá-la.
+   Sem a configuração, a busca lexical e os exemplos prontos continuam disponíveis.
+   O modelo de geração da aplicação web é `gemini-3.6-flash`, definido em
+   `web_conteudo.py`. A configuração do notebook é independente.
 5. Clique em **Deploy**. A hospedagem fornece um endereço `*.streamlit.app`.
 
 Não envie `.env` nem `.streamlit/secrets.toml` ao GitHub. O arquivo
@@ -34,7 +35,12 @@ Cada busca híbrida gera apenas o embedding da pergunta, usando exatamente o mod
 a dimensão e o formato do manifesto. BM25, cosseno e RRF rodam no servidor. O usuário
 pode inspecionar os trechos, gerar slides com as três primeiras evidências e baixar
 PDF, JSON e referências. A compilação Typst usa arquivos temporários separados por
-operação; resultados e chaves de visitantes não são gravados nos artefatos.
+operação; resultados não são gravados nos artefatos.
+
+O campo da pergunta oferece oito sugestões e aceita perguntas livres. Depois da
+consulta, a configuração do tema aparece antes das evidências. As apresentações
+prontas em `exemplos/` podem ser abertas no leitor PDF do próprio site sem chamadas
+ao Gemini. Seus arquivos são cópias dos PDFs fornecidos pelo responsável pelo projeto.
 
 Mantenha extração, atualização do corpus e geração dos embeddings no notebook.
 Quando atualizar o índice, publique juntos o manifesto, chunks e vetores. Não é
